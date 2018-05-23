@@ -13,3 +13,49 @@ rule contigs_by_taxa:
         contigs = expand(str(ANNOTATION_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.txt'), sample=Samples.keys())
     script:
         sunbeam_dir + '/extensions/sbx_contigs/contigs_by_taxa.R'
+
+
+## Make sure you update your samples.csv and sunbeam_config.yml before you preoceed
+rule _contigs_selected:
+    input:
+        expand(str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}-contigs.fa'), sample=Samples.keys())
+
+rule contigs_selected:
+    input:
+        contig = str(ASSEMBLY_FP/'contigs'/'{sample}-contigs.fa'),
+        names = str(ANNOTATION_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.txt')
+    output:
+        str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}-contigs.fa')
+    shell:
+        """
+        seqtk subseq {input.contig} {input.names} > {output}
+        """
+
+rule contigs_mapping:
+    input:
+        contig = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}-contigs.fa'),
+        reads = expand(str(QC_FP/'decontam'/'{{sample}}_{rp}.fastq.gz'),rp = Pairs)
+    output:
+        sam = temp(str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.sam')),
+        bam = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.sorted.bam'),
+        bai = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.sorted.bam.bai'),
+        bcf = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.raw.bcf'),
+        counts = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.counts'),
+        cov = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.coverage')
+    threads: 8
+    shell:
+        """
+        bwa index {input.contig}
+
+        bwa mem -M -t {threads} {input.contig} {input.reads} -o {output.sam}
+        samtools view -@ {threads} -b -F4 {output.sam} | samtools sort -@ {threads} > {output.bam}
+        samtools index {output.bam} {output.bai}
+        samtools mpileup -gf {input.contig} {output.bam} | bcftools call -Ob -v -c - > {output.bcf}
+        
+        samtools idxstats {output.bam} | cut -f 1,3 | sed '$ d' > {output.counts}
+        bedtools genomecov -ibam {output.bam} -g {input.contig} -bg > {output.cov}
+        """
+
+rule _contigs_mapping:
+    input:
+        expand(str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.coverage'), sample=Samples.keys())

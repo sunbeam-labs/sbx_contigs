@@ -26,6 +26,7 @@ blastn <- do.call(rbind,
 ## Filter by taxaName, this is slower, yet RefSeq doesn't necessarily update the new assembly 
 blastn <- cbind(blastn, getTaxonomy(blastn$taxaID,taxaNodes,taxaNames))
 
+taxaName <- gsub("_", " ", taxaName)
 blastn_taxa <- filter(blastn, grepl(taxaName, species, perl=T, ignore.case = T))
 
 ## NOW all we need is to write the contig names of the filtered contigs into separate file
