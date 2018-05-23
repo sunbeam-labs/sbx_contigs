@@ -1,0 +1,7 @@
+sbx_contigs:
+  threads: 2
+  taxa_nodes_fp: "/mnt/isilon/microbiome/analysis/biodata/taxonomizr_20170925/nodes.dmp"
+  taxa_names_fp: "/mnt/isilon/microbiome/analysis/biodata/taxonomizr_20170925/names.dmp"
+  taxa_sql_fp: "/mnt/isilon/microbiome/analysis/biodata/taxonomizr_20170925/accessionTaxa.sql"
+  taxa_of_interest: "Escherichia coli"
+  blast_db: "bacteria"

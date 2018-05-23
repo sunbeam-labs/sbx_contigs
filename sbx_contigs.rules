@@ -1,0 +1,15 @@
+rule contigs_by_taxa:
+    input:
+        summary_files = expand(str(ANNOTATION_FP/'summary'/'{sample}.tsv'), sample=Samples.keys()),
+        taxa_nodes = Cfg['sbx_contigs']['taxa_nodes_fp'],
+        taxa_names = Cfg['sbx_contigs']['taxa_names_fp'],
+        taxa_sql = Cfg['sbx_contigs']['taxa_sql_fp']
+    output:
+        report = str(ANNOTATION_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports.txt')
+    params:
+        outdir = str(ANNOTATION_FP/Cfg['sbx_contigs']['taxa_of_interest']),
+        db = Cfg['sbx_contigs']['blast_db'],
+        taxaName = Cfg['sbx_contigs']['taxa_of_interest'],
+        contigs = expand(str(ANNOTATION_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.txt'), sample=Samples.keys())
+    script:
+        sunbeam_dir + '/extensions/sbx_contigs/contigs_by_taxa.R'
