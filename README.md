@@ -1,4 +1,4 @@
-# Sunbeam Contigs extension
+# Sunbeam Contigs extension [beta]
 
 This is an extension to select [contigs](https://github.com/sunbeam-labs/sunbeam/blob/dev/rules/assembly/assembly.rules) based on the [blast summary](https://github.com/sunbeam-labs/sunbeam/blob/dev/rules/annotation/annotation.rules) for a give taxon of interest, e.g. Escherichia coli, calculate the coverage by mapping reads back and generate coverage plot.
 
@@ -30,3 +30,7 @@ There are a few steps in this extension:
   ```bash
   sunbeam run --configfile=sunbeam_config.yml _contigs_mapping
   ```
+
+## TODO:
+
+Make taxonomizr a conda package 💪🏻
