@@ -34,3 +34,4 @@ There are a few steps in this extension:
 ## TODO:
 
 Make taxonomizr a conda package 💪🏻
+Add a R script to summarize the contigs coverage stats.
