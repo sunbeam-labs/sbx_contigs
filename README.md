@@ -24,7 +24,9 @@ There are a few steps in this extension:
   ## now we can check the reports.txt to see the sample distribution and update the samples.csv
   grep -Fwf <(cut -f1 sunbeam_output/annotation/taxaName/reports.txt | uniq | sort -u) samples.csv > samples.${taxa}.csv
   ```
-
-
-
+  
+ 3. Once we have the selected contigs ready for each sample, we can simply to the reads back to each contigs and get the coverage stats.
  
+  ```bash
+  sunbeam run --configfile=sunbeam_config.yml _contigs_mapping
+  ```
