@@ -75,7 +75,7 @@ rule _all_coverage:
         expand(str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.csv'), 
                sample=Samples.keys())
 
-def get_coverage(input_fp, output_fp):
+def get_coverage(input_fp, sample, output_fp):
     with open(input_fp) as f:
         reader = csv.reader(f, delimiter='\t')    
     	data = {}
@@ -94,11 +94,11 @@ def get_coverage(input_fp, output_fp):
         stddev     = numpy.std(data[segment])
         gen_cov    = len(list(filter(lambda x: x!=0, data[segment])))
         gen_length = len(data[segment])
-        row = [segment, minval, maxval, mean, median, stddev, gen_cov, gen_length]
+        row = [sample, segment, minval, maxval, mean, median, stddev, gen_cov, gen_length]
         output_rows.append(row)
 
     # write out stats per segment per sample
-    fields = ['contig', 'min', 'max', 'mean', 'median', 'stddev', 'coverage', 'length']
+    fields = ['sample','contig', 'min', 'max', 'mean', 'median', 'stddev', 'coverage', 'length']
     with open(output_fp, 'w') as f:
         writer = csv.writer(f)
         writer.writerow(fields)
@@ -111,7 +111,7 @@ rule get_coverage:
     output:
         str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.csv')
     run:
-        get_coverage(input[0], output[0])
+        get_coverage(input[0], wildcards.sample, output[0])
 
 rule summarize_coverage:
     input:
