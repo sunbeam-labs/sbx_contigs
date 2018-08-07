@@ -33,5 +33,9 @@ There are a few steps in this extension:
   sunbeam run --configfile=sunbeam_config.yml _contigs_mapping
   ```
 
-4. Contigs coverage stats
+4. Summarize contigs coverage
+
+  ```bash
+  sunbeam run --configfile=sunbeam_config.yml summarize_coverage
+  ```
 
