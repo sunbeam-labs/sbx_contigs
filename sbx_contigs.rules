@@ -1,3 +1,8 @@
+# -*- mode: Snakemake -*-
+
+import csv
+import numpy
+
 rule contigs_by_taxa:
     input:
         summary_files = expand(str(ANNOTATION_FP/'summary'/'{sample}.tsv'), sample=Samples.keys()),
@@ -17,6 +22,7 @@ rule contigs_by_taxa:
 
 
 ## Make sure you update your samples.csv and sunbeam_config.yml before you preoceed
+
 rule _contigs_selected:
     input:
         expand(str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}-contigs.fa'), sample=Samples.keys())
@@ -41,8 +47,9 @@ rule contigs_mapping:
         bam = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.sorted.bam'),
         bai = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.sorted.bam.bai'),
         bcf = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.raw.bcf'),
-        counts = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.counts'),
-        cov = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.coverage')
+        counts = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.counts'),
+        cov = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.coverage'),
+        depth = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.depth')
     threads: 8
     shell:
         """
@@ -53,10 +60,64 @@ rule contigs_mapping:
         samtools index {output.bam} {output.bai}
         samtools mpileup -gf {input.contig} {output.bam} | bcftools call -Ob -v -c - > {output.bcf}
         
+        samtools depth -aa {output.bam} > {output.depth}
         samtools idxstats {output.bam} | cut -f 1,3 | sed '$ d' > {output.counts}
         bedtools genomecov -ibam {output.bam} -g {input.contig} -bg > {output.cov}
         """
 
 rule _contigs_mapping:
     input:
-        expand(str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.coverage'), sample=Samples.keys())
+        expand(str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.{suffix}'), 
+               sample=Samples.keys(), suffix = ['coverage', 'depth', 'counts'])
+
+rule _all_coverage:
+    input:
+        expand(str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.csv'), 
+               sample=Samples.keys())
+
+def get_coverage(input_fp, output_fp):
+    with open(input_fp) as f:
+        reader = csv.reader(f, delimiter='\t')    
+    	data = {}
+    	for row in reader:
+            if not data.get(row[0]):
+                data[row[0]] = []
+            data[row[0]].append(int(row[2]))
+    
+    # summarize stats for all segments present and append to output
+    output_rows = []
+    for segment in data.keys():
+        minval     = numpy.min(data[segment])
+        maxval     = numpy.max(data[segment])
+        mean       = numpy.mean(data[segment])
+        median     = numpy.median(data[segment])
+        stddev     = numpy.std(data[segment])
+        gen_cov    = len(list(filter(lambda x: x!=0, data[segment])))
+        gen_length = len(data[segment])
+        row = [segment, minval, maxval, mean, median, stddev, gen_cov, gen_length]
+        output_rows.append(row)
+
+    # write out stats per segment per sample
+    fields = ['contig', 'min', 'max', 'mean', 'median', 'stddev', 'coverage', 'length']
+    with open(output_fp, 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(fields)
+        writer.writerows(output_rows)
+
+
+rule get_coverage:
+    input:
+        str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.depth')
+    output:
+        str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.csv')
+    run:
+        get_coverage(input[0], output[0])
+
+rule summarize_coverage:
+    input:
+        expand(str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.csv'), 
+               sample = Samples.keys())
+    output:
+        str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'coverage.csv')
+    shell:
+        "(head -n 1 {input[0]}; tail -q -n +2 {input}) > {output}"
