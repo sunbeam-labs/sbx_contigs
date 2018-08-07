@@ -7,7 +7,7 @@ This is an extension to select [contigs](https://github.com/sunbeam-labs/sunbeam
 With you sunbeam conda environment activated, simply clone the extension directory into the sunbeam/extensions/ folder, installing requirements, and add new options to you existing configuration file:
 
   ```bash
-   git clone https://github.com/zhaoc1/sbx_contigs.git extensions/sbx_contigs
+   git clone https://github.com/sunbeam-labs/sbx_contigs.git extensions/sbx_contigs
    conda install --file extensions/sbx_contigs/requirements.txt
    cat extensions/sbx_contigs/config.yml >> sunbeam_config.yml
    ```
