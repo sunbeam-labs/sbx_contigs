@@ -12,6 +12,8 @@ With you sunbeam conda environment activated, simply clone the extension directo
    cat extensions/sbx_contigs/config.yml >> sunbeam_config.yml
    ```
  
+You also need to follow the instructions from the [taxonomizr](https://github.com/sherrillmix/taxonomizr) to download and build the database, and specify the path/to/the/db in the contig.yml file.
+
 ## Running
 
 There are a few steps in this extension:
