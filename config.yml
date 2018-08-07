@@ -5,3 +5,4 @@ sbx_contigs:
   taxa_sql_fp: "/mnt/isilon/microbiome/analysis/biodata/taxonomizr_20170925/accessionTaxa.sql"
   taxa_of_interest: "Escherichia coli"
   blast_db: "bacteria"
+  min_contig_len: 2000
