@@ -9,6 +9,7 @@ rule contigs_by_taxa:
     params:
         outdir = str(ANNOTATION_FP/Cfg['sbx_contigs']['taxa_of_interest']),
         db = Cfg['sbx_contigs']['blast_db'],
+        min_contig_len = Cfg['sbx_contigs']['min_contig_len'],
         taxaName = Cfg['sbx_contigs']['taxa_of_interest'],
         contigs = expand(str(ANNOTATION_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.txt'), sample=Samples.keys())
     script:
