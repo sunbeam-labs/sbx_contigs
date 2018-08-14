@@ -33,9 +33,14 @@ There are a few steps in this extension:
   sunbeam run --configfile=sunbeam_config.yml _contigs_mapping
   ```
 
-4. Summarize contigs coverage
-
-  ```bash
-  sunbeam run --configfile=sunbeam_config.yml summarize_coverage
-  ```
-
+4. Contigs coverage stats
+ 
+    Same with [genome mapping](https://github.com/sunbeam-labs/sunbeam/blob/dev/rules/mapping/mapping.rules), we want two kinds of stats files:
+     
+     - contigs mapping coverage summary 
+     - coverage per base for each sample
+     
+    ```bash
+    sunbeam run --configfile=sunbeam_config.yml summarize_coverage
+    ```
+    
