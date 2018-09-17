@@ -1,6 +1,8 @@
 # Sunbeam Contigs extension
 
-This is an extension to select [contigs](https://github.com/sunbeam-labs/sunbeam/blob/dev/rules/assembly/assembly.rules) based on the [blast summary](https://github.com/sunbeam-labs/sunbeam/blob/dev/rules/annotation/annotation.rules) for a give taxon of interest, e.g. Escherichia coli, calculate the coverage by mapping reads, summarize coverage and generate coverage plot.
+This is an extension to select [contigs](https://github.com/sunbeam-labs/sunbeam/blob/dev/rules/assembly/assembly.rules) based on the [blast summary](https://github.com/sunbeam-labs/sunbeam/blob/dev/rules/annotation/annotation.rules) for a give taxon of interest, e.g. Escherichia coli.
+
+In parallel, this extension also calculates the coverage for the all the contigs passing the size selection by aligning reads back, summarize coverage and generate coverage plot.
 
 ## Installing
 
@@ -27,13 +29,7 @@ There are a few steps in this extension:
   grep -Fwf <(cut -f1 sunbeam_output/annotation/taxaName/reports.txt | uniq | sort -u) samples.csv > samples.${taxa}.csv
   ```
   
-3. Once we have the selected contigs ready for each sample, we can simply to the reads back to each contigs and get the coverage stats.
- 
-  ```bash
-  sunbeam run --configfile=sunbeam_config.yml _contigs_mapping
-  ```
-
-4. Contigs coverage stats
+3. Contigs coverage stats
  
     Same with [genome mapping](https://github.com/sunbeam-labs/sunbeam/blob/dev/rules/mapping/mapping.rules), we want two kinds of stats files:
      
