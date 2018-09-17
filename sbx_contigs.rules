@@ -38,18 +38,37 @@ rule contigs_selected:
         seqtk subseq {input.contig} {input.names} > {output}
         """
 
+## I think it's common practice to calcuate contigs coverage, so I re-organize the following rules
+
+rule contigs_filter_by_length:
+   input: 
+        str(ASSEMBLY_FP/'contigs'/'{sample}-contigs.fa')
+   output:
+        str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'{sample}-contigs.fa')
+   params:
+        len = Cfg['sbx_contigs']['min_contig_len']
+   shell:
+        """
+        vsearch --sortbylength {input} \
+            --minseqlength {params.len} \
+            --maxseqlength -1 \
+            --notrunclabels \
+            --output {output}
+        """
+
 rule contigs_mapping:
     input:
-        contig = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}-contigs.fa'),
+        #contig = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}-contigs.fa'),
+        contig = str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'{sample}-contigs.fa'),
         reads = expand(str(QC_FP/'decontam'/'{{sample}}_{rp}.fastq.gz'),rp = Pairs)
     output:
-        sam = temp(str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.sam')),
-        bam = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.sorted.bam'),
-        bai = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.sorted.bam.bai'),
-        bcf = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'{sample}.raw.bcf'),
-        counts = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.counts'),
-        cov = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.coverage'),
-        depth = str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.depth')
+        sam = temp(str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'{sample}.sam')),
+        bam = str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'{sample}.sorted.bam'),
+        bai = str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'{sample}.sorted.bam.bai'),
+        bcf = str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'{sample}.raw.bcf'),
+        counts = str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'reports'/'{sample}.counts'),
+        cov = str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'reports'/'{sample}.coverage'),
+        depth = str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'reports'/'{sample}.depth')
     threads: 8
     shell:
         """
@@ -67,12 +86,12 @@ rule contigs_mapping:
 
 rule _contigs_mapping:
     input:
-        expand(str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.{suffix}'), 
+        expand(str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'reports'/'{sample}.{suffix}'), 
                sample=Samples.keys(), suffix = ['coverage', 'depth', 'counts'])
 
 rule _all_coverage:
     input:
-        expand(str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.csv'), 
+        expand(str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'reports'/'{sample}.csv'), 
                sample=Samples.keys())
 
 def get_coverage(input_fp, sample, output_fp):
@@ -107,17 +126,17 @@ def get_coverage(input_fp, sample, output_fp):
 
 rule get_coverage:
     input:
-        str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.depth')
+        str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'reports'/'{sample}.depth')
     output:
-        str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.csv')
+        str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'reports'/'{sample}.csv')
     run:
         get_coverage(input[0], wildcards.sample, output[0])
 
 rule summarize_coverage:
     input:
-        expand(str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'{sample}.csv'), 
+        expand(str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'reports'/'{sample}.csv'), 
                sample = Samples.keys())
     output:
-        str(ASSEMBLY_FP/Cfg['sbx_contigs']['taxa_of_interest']/'reports'/'coverage.csv')
+        str(ASSEMBLY_FP/'sbx_contigs'/Cfg['sbx_contigs']['min_contig_len']/'reports'/'coverage.csv')
     shell:
         "(head -n 1 {input[0]}; tail -q -n +2 {input}) > {output}"
