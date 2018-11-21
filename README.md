@@ -1,8 +1,6 @@
 # Sunbeam Contigs extension
 
-This is an extension to select [contigs](https://github.com/sunbeam-labs/sunbeam/blob/dev/rules/assembly/assembly.rules) based on the [blast summary](https://github.com/sunbeam-labs/sunbeam/blob/dev/rules/annotation/annotation.rules) for a give taxon of interest, e.g. Escherichia coli.
-
-In parallel, this extension also calculates the coverage for the all the contigs passing the size selection by aligning reads back, summarize coverage and generate coverage plot.
+This is an extension to select [assembled contigs](https://github.com/sunbeam-labs/sunbeam/blob/dev/rules/assembly/assembly.rules) based on the taxonomy annotation by parsing the [blastn summary](https://github.com/sunbeam-labs/sunbeam/blob/dev/rules/annotation/annotation.rules). For example, we are interested in get all the contigs annotated as a give taxon of interest (e.g. Escherichia coli), and later on assess the metagenomics assembled genomes (MAG) quality using [checkM](https://github.com/Ecogenomics/CheckM).
 
 ## Installing
 
