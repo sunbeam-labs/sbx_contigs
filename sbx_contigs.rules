@@ -139,4 +139,4 @@ rule summarize_coverage:
     output:
         str(ASSEMBLY_FP/'sbx_contigs'/'reports'/'coverage.csv')
     shell:
-        "(head -n 1 {input[0]}; tail -q -n +2 {input}) > {output}"
+        "(
