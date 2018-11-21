@@ -30,3 +30,9 @@ There are a few steps in this extension:
   ```bash
   grep -Fwf <(cut -f1 sunbeam_output/annotation/taxaName/reports.txt | uniq | sort -u) samples.csv > samples.${taxa}.csv
   ```
+  
+4. Finally, we can get all the E. coli contigs
+
+  ```bash
+  sunbeam run --configfile=sunbeam_config.yml _contigs_selected
+  ```
