@@ -1,4 +1,2 @@
 r-dplyr
 r-readr
-seqtk
-bedtools
